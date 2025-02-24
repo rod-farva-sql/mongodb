@@ -129,13 +129,13 @@ run_command "sudo dpkg -i mongodb-org-shell_3.6.5_arm64.deb" "Installing mongodb
 
 
 #Set permissions
-run_command "chown -R mongodb:mongodb /var/lib/mongodb" "Set ownership on /var/lib/mongodb to mongodb:mongodb"
-run_command "chown -R mongodb:mongodb /var/log/mongodb" "Set ownership on /var/log/mongodb to mongodb:mongodb"
+run_command "sudo chown -R mongodb:mongodb /var/lib/mongodb" "Set ownership on /var/lib/mongodb to mongodb:mongodb"
+run_command "sudo chown -R mongodb:mongodb /var/log/mongodb" "Set ownership on /var/log/mongodb to mongodb:mongodb"
 
 #Download and update /etc/mongod.conf
 run_command "wget https://github.com/rod-farva-sql/mongodb/blob/main/qa-mongodb-11/etc/mongod.conf" "Downloading /etc/mongod.conf"
 
-run_command "cp -f mongod.conf /etc/mongod.conf" "Updating /etc/mongod.conf with new version"
+run_command "sudo cp -f mongod.conf /etc/mongod.conf" "Updating /etc/mongod.conf with new version"
 
 run_command "sudo systemctl enable mongod" "Enabling mongod service"
 
