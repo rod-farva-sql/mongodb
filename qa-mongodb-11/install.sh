@@ -133,4 +133,13 @@ run_command "chown -R mongodb:mongodb /var/lib/mongodb" "Set ownership on /var/l
 
 
 #Download and update /etc/mongod.conf
-run_command "wget http://launchpadlibrarian.net/668090466/libssl1.0.0_1.0.2n-1ubuntu5.13_arm64.deb" "Downloading /etc/mongod.conf"
+run_command "wget https://github.com/rod-farva-sql/mongodb/blob/main/qa-mongodb-11/etc/mongod.conf" "Downloading /etc/mongod.conf"
+
+run_command "cp -f mongod.conf /etc/mongod.conf" "Updating /etc/mongod.conf with new version"
+
+run_command "sudo systemctl enable mongod" "Enabling mongod service"
+
+run_command "sudo systemctl start mongod" "Starting mongod service"
+
+run_command "sudo systemctl status mongod -l" "Checking status of mongod service"
+
