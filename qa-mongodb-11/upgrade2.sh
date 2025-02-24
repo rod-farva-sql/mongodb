@@ -1,5 +1,34 @@
 #!/bin/bash
 
+# Function to run a command and check its result
+run_command() {
+    eval "$1"
+    if [ $? -eq 0 ]; then
+        success_message "$2 succeeded."
+    else
+        error_message "$2 failed. Stopping script."
+        exit 1
+    fi
+}
+
+# Function to echo messages in green
+success_message() {
+    echo -e "\e[32m$1\e[0m"
+}
+
+# Function to echo messages in red
+error_message() {
+    echo -e "\e[31m$1\e[0m"
+}
+
+# Check if the script is run as root
+if [[ $EUID -ne 0 ]]; then
+  echo "This script must be run as root. Use sudo or log in as root."
+  exit 1
+fi
+
+
+
 # Function to check command success
 check_success() {
     if [ $? -ne 0 ]; then
@@ -87,43 +116,6 @@ check_mount() {
 #This is where the party starts...
 
 
-# Verify /var/lib/mongodb_backup is mounted
-check_mount "/var/lib/mongodb_backup"
-
-
-# Ask user if they want to run the script
-echo -e "\033[1;33mDo you want to run mongodump from qa-mongodb-02 and place the files on the local machine? (y/n)\033[0m"
-read -p "Enter your choice: " choice
-
-if [[ "$choice" != "y" && "$choice" != "Y" ]]; then
-    echo -e "\033[1;31mExiting the script.\033[0m"
-    exit 0
-fi
-
-echo -e "\033[1;32mContinuing with mongodump...\033[0m"
-
-mongodump --host qa-mongodb-02.fanthreesixty.com --port 27017 --gzip --numParallelCollections=1 --out /var/lib/mongodb_backup/migration
-check_success "Mongodump completed"
-
-
-
-
-# Ask user if they want to import the dump from qa-mongdb-02 into the local server
-echo -e "\033[1;33mDo you want to import/mongro restore the data in /var/log/mongodb_backup/migration to the local machine? (y/n)\033[0m"
-read -p "Enter your choice: " choice
-
-if [[ "$choice" != "y" && "$choice" != "Y" ]]; then
-    echo -e "\033[1;31mExiting the script.\033[0m"
-    exit 0
-fi
-
-echo -e "\033[1;32mContinuing with mongorestore...\033[0m"
-#we want to exclude the config files as that contains sharding info for the cluster...
-mongorestore --host localhost --port 27017 --gzip --dir=/var/lib/mongodb_backup/migration/ --nsExclude=config.*
-check_success "Mongorestore completed"
-
-
-
 # Ask user if they want to upgrade the local mongodb instance from 3.6.5 to 6.0.18
 echo -e "\033[1;33mDo you want to upgrade the local mongodb instance from 3.6.5 to 6.0.18? (y/n)\033[0m"
 read -p "Enter your choice: " choice
@@ -137,29 +129,23 @@ echo -e "\033[1;32mContinuing with upgrade...\033[0m"
 
 # Upgrade from 3.6 to 4.0
 echo -e "\033[1;33mUpgrading from 3.6 to 4.0... \033[0m"
-cat <<EOF | sudo tee /etc/yum.repos.d/mongodb-org-4.0.repo
-[mongodb-org-4.0]
-name=MongoDB Repository
-baseurl=https://repo.mongodb.org/yum/redhat/7/mongodb-org/4.0/x86_64/
-gpgcheck=1
-enabled=1
-gpgkey=https://www.mongodb.org/static/pgp/server-4.0.asc
-EOF
 
-sudo systemctl stop mongod
-check_success "Stopping MongoDB"
+run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/4.0/multiverse/binary-arm64/mongodb-org-server_4.0.28_arm64.deb" "Downloading mongodb-org-server"
+run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/4.0/multiverse/binary-arm64/mongodb-org-shell_4.0.28_arm64.deb" "Downloading mongodb-org-shell"
+run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/4.0/multiverse/binary-arm64/mongodb-org-tools_4.0.28_arm64.deb" "Downloading mongodb-org-tools"
 
-sudo yum install -y mongodb-org
-check_success "Installing MongoDB 4.0"
+run_command "sudo systemctl stop mongod" "Stopping mongod service"
 
-sudo systemctl start mongod
-check_success "Starting MongoDB 4.0"
+run_command "sudo dpkg -i mongodb-org-server_4.0.28_arm64.deb" "Installing mongodb-org-server"
+run_command "sudo dpkg -i mongodb-org-shell_4.0.28_arm64.deb" "Installing mongodb-org-shell"
+run_command "sudo dpkg -i mongodb-org-tools_4.0.28_arm64.deb" "Installing mongodb-org-tools"
+
+run_command "sudo systemctl start mongod" "Starting MongoDB 4.0"
 
 # Wait for mongod to be up and running
 wait_for_mongod
 
-mongo --quiet --eval "db.adminCommand({ setFeatureCompatibilityVersion: '4.0' })"
-check_success "Setting FCV to 4.0"
+run_command 'mongo --quiet --eval "db.adminCommand({ setFeatureCompatibilityVersion: '4.0' })"' "Setting FCV to 4.0"
 
 verify_fcv "4.0"
 
