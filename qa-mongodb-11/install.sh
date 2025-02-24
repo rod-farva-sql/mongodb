@@ -133,7 +133,7 @@ run_command "sudo chown -R mongodb:mongodb /var/lib/mongodb" "Set ownership on /
 run_command "sudo chown -R mongodb:mongodb /var/log/mongodb" "Set ownership on /var/log/mongodb to mongodb:mongodb"
 
 #Download and update /etc/mongod.conf
-run_command "wget https://github.com/rod-farva-sql/mongodb/blob/main/qa-mongodb-11/etc/mongod.conf" "Downloading /etc/mongod.conf"
+run_command "wget https://raw.githubusercontent.com/rod-farva-sql/mongodb/refs/heads/main/qa-mongodb-11/etc/mongod.conf" "Downloading /etc/mongod.conf"
 
 run_command "sudo cp -f mongod.conf /etc/mongod.conf" "Updating /etc/mongod.conf with new version"
 
