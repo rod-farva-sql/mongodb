@@ -130,3 +130,7 @@ run_command "sudo dpkg -i mongodb-org-shell_3.6.5_arm64.deb" "Installing mongodb
 
 #Set permissions
 run_command "chown -R mongodb:mongodb /var/lib/mongodb" "Set ownership on /var/lib/mongodb to mongodb:mongodb"
+
+
+#Download and update /etc/mongod.conf
+run_command "wget http://launchpadlibrarian.net/668090466/libssl1.0.0_1.0.2n-1ubuntu5.13_arm64.deb" "Downloading /etc/mongod.conf"
