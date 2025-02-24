@@ -70,7 +70,7 @@ fi
 
 
 #Wait for the volume to be attached
-while  ! -e /dev/nvme1n1 ; do sleep 1; done
+while  [! -e /dev/nvme1n1] ; do sleep 1; done
 
 #Check if the volume already has a filesystem
 if ! blkid /dev/nvme1n1 | grep -q "UUID"; then
