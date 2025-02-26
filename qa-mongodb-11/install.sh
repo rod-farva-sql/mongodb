@@ -103,18 +103,18 @@ fi
 
 
 
-#Now its time to install Mongodb 3.6.5
+#Now its time to install Mongodb 3.6.23
 
-#This is a prereq for mongodb 3.6.5
+#This is a prereq for mongodb 3.6.23
 run_command "wget http://launchpadlibrarian.net/668090466/libssl1.0.0_1.0.2n-1ubuntu5.13_arm64.deb" "Downloading libssl1.0.0"
 
-run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-server_3.6.5_arm64.deb" "Downloading mongodb-org-server"
+run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-server_3.6.23_arm64.deb" "Downloading mongodb-org-server"
 
-run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-mongos_3.6.5_arm64.deb" "Downloading mongodb-org-mongos"
+run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-mongos_3.6.23_arm64.deb" "Downloading mongodb-org-mongos"
 
-run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-tools_3.6.5_arm64.deb" "Downloading mongodb-org-tools"
+run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-tools_3.6.23_arm64.deb" "Downloading mongodb-org-tools"
 
-run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-shell_3.6.5_arm64.deb" "Downloading mongodb-org-shell"
+run_command "wget https://repo.mongodb.org/apt/ubuntu/dists/xenial/mongodb-org/3.6/multiverse/binary-arm64/mongodb-org-shell_3.6.23_arm64.deb" "Downloading mongodb-org-shell"
 
   
 run_command "sudo dpkg -i libssl1.0.0_1.0.2n-1ubuntu5.13_arm64.deb" "Installing libssl1.0.0"
