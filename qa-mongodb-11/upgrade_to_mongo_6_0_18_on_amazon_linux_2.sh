@@ -177,6 +177,9 @@ wait_for_mongod
 # Validate MongoDB version
 check_mongodb_version "4.0.28"
 
+# Verify the replica set is running
+check_replica_set
+
 #Validate the FCV is now at 4.0
 run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '4.0' })\"" "Setting FCV to 4.0"
 verify_fcv "4.0"
