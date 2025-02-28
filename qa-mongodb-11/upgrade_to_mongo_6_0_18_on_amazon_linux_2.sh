@@ -72,7 +72,7 @@ wait_for_mongod() {
 # Function to verify MongoDB server version
 check_mongodb_version() {
     local expected_version=$1
-    local current_version=$(mongosh --quiet --eval "db.version()" 2>/dev/null)
+    local current_version=$(mongo --quiet --eval "db.version()" 2>/dev/null)
 
     if [[ $? -ne 0 ]]; then
         echo "Error: Failed to connect to MongoDB. Ensure the service is running."
