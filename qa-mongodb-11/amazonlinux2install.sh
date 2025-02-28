@@ -121,8 +121,9 @@ run_command "sudo rpm -ivh mongodb-org-tools-3.6.23-1.amzn2.x86_64.rpm" "Install
 run_command "sudo rpm -ivh mongodb-org-shell-3.6.23-1.amzn2.x86_64.rpm" "Installing mongodb-org-shell 3.6.23"
 
 #Set permissions
-run_command "sudo chown -R mongodb:mongodb /var/lib/mongodb" "Set ownership on /var/lib/mongodb to mongodb:mongodb"
-run_command "sudo chown -R mongodb:mongodb /var/log/mongodb" "Set ownership on /var/log/mongodb to mongodb:mongodb"
+#RPM package sets mongo user as mongod instead of mongodb
+run_command "sudo chown -R mongod:mongod /var/lib/mongodb" "Set ownership on /var/lib/mongodb to mongod:mongod"
+run_command "sudo chown -R mongod:mongod /var/log/mongodb" "Set ownership on /var/log/mongodb to mongod:mongod"
 
 #Download and update /etc/mongod.conf
 run_command "wget https://raw.githubusercontent.com/rod-farva-sql/mongodb/refs/heads/main/qa-mongodb-11/etc/mongod.conf" "Downloading /etc/mongod.conf"
