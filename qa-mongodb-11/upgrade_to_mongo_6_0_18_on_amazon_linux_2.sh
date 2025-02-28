@@ -35,10 +35,10 @@ verify_fcv() {
     fi
 }
 
-# Function to verify feature compatibility version with mongosh
+# Function to verify feature compatibility version with mongo
 verify_fcv_sh() {
     local expected_version=$1
-    local fcv=$(mongosh --quiet --eval "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']")
+    local fcv=$(mongo --quiet --eval "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']")
     if [[ "$fcv" == "$expected_version" ]]; then
         echo -e "\033[1;32mFeature Compatibility Version is $fcv (as expected). \033[0m"
     else
