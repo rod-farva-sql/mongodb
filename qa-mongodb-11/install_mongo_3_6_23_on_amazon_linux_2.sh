@@ -115,6 +115,23 @@ if ! grep -q "UUID=$UUID" /etc/fstab; then
 fi
 
 
+# Check if there is data on the mounted volume
+if [ "$(ls -A /var/lib/mongodb)" ]; then
+    echo "Warning: Data found on /var/lib/mongodb."
+    read -p "Would you like to wipe the volume? (yes/no): " response
+
+    if [[ "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
+        echo "Wiping the volume..."
+        rm -rf "/var/lib/mongodb"/*
+        echo "Volume has been wiped."
+    else
+        echo "Volume data has been kept."
+    fi
+else
+    echo "The volume is empty."
+fi
+
+
 read -p "Do you want to download install mongodb 3.6.5? (yes/no): " answer
 if [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]; then
   echo "Continuing..."
