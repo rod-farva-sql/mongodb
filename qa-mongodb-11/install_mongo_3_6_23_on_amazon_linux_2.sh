@@ -23,6 +23,28 @@ error_message() {
     echo -e "\e[31m$1\e[0m"
 }
 
+
+
+# Function to initiate MongoDB replica set
+initiate_replica_set() {
+    echo "Initiating MongoDB replica set..."
+
+    # Run rs.initiate() and capture the output
+    local init_result=$(mongo --quiet --eval "try { rs.initiate(); rs.status().ok } catch(e) { printjson(e) }" 2>/dev/null)
+
+    # Check if the initiation was successful
+    if [[ "$init_result" == "1" ]]; then
+        success_message "Replica set successfully initiated."
+    else
+        error_message "Error: Failed to initiate replica set. It may already be initialized or there was an issue."
+        exit 1
+    fi
+}
+
+
+####################################
+
+
 # Check if the script is run as root
 if [[ $EUID -ne 0 ]]; then
   echo "This script must be run as root. Use sudo or log in as root."
@@ -135,4 +157,9 @@ run_command "sudo systemctl enable mongod" "Enabling mongod service"
 run_command "sudo systemctl start mongod" "Starting mongod service"
 
 run_command "sudo systemctl status mongod -l" "Checking status of mongod service"
+
+echo "Initiating replica set"
+# Lets initiate the replica set
+initiate_replica_set
+
 
