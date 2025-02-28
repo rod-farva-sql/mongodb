@@ -224,13 +224,9 @@ run_command "systemctl stop mongod" "Stopping MongoDB"
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/RPMS/mongodb-org-server-4.4.29-1.amzn2.x86_64.rpm" "Downloading mongodb-org-server 4.4.29"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/RPMS/mongodb-org-tools-4.4.29-1.amzn2.x86_64.rpm" "Downloading mongodb-org-tools 4.4.29"
-
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/RPMS/mongodb-org-shell-4.4.29-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 4.4.29"
 
 run_command "rpm -Uvh mongodb-org-server-4.4.29-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 4.4.29"
-
-run_command "rpm -Uvh mongodb-org-tools-4.4.29-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-tools to 4.4.29"
 
 run_command "rpm -Uvh mongodb-org-shell-4.4.29-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.4.29"
 
@@ -273,13 +269,9 @@ run_command "systemctl stop mongod" "Stopping MongoDB"
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/RPMS/mongodb-org-server-5.0.31-1.amzn2.x86_64.rpm" "Downloading mongodb-org-server 5.0.31"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/RPMS/mongodb-org-tools-5.0.31-1.amzn2.x86_64.rpm" "Downloading mongodb-org-tools 5.0.31"
-
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/RPMS/mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 5.0.31"
 
 run_command "rpm -Uvh mongodb-org-server-5.0.31-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 5.0.31"
-
-run_command "rpm -Uvh mongodb-org-tools-5.0.31-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-tools to 5.0.31"
 
 run_command "rpm -Uvh mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 5.0.31"
 
@@ -324,15 +316,7 @@ run_command "systemctl stop mongod" "Stopping MongoDB"
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-org-server 6.0.19"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-tools-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-org-tools 6.0.19"
-
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-shell-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 6.0.19"
-
 run_command "rpm -Uvh mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 6.0.19"
-
-run_command "rpm -Uvh mongodb-org-tools-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-tools to 6.0.19"
-
-run_command "rpm -Uvh mongodb-org-shell-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 6.0.19"
 
 run_command "sudo systemctl start mongod"
 
