@@ -137,7 +137,7 @@ run_command "rpm -Uvh mongodb-org-tools-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mo
 
 run_command "rpm -Uvh mongodb-org-shell-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.0.28"
 
-run command "sudo systemctl start mongod"
+run_command "sudo systemctl start mongod"
 
 # Wait for mongod to be up and running
 wait_for_mongod
@@ -146,7 +146,7 @@ wait_for_mongod
 check_mongodb_version "4.0.28"
 
 #Validate the FCV is now at 4.0
-run command "mongo --quiet --eval "db.adminCommand({ setFeatureCompatibilityVersion: '4.0' })"" "Setting FCV to 4.0"
+run_command "mongo --quiet --eval "db.adminCommand({ setFeatureCompatibilityVersion: '4.0' })"" "Setting FCV to 4.0"
 verify_fcv "4.0"
 
 echo -e "\033[1;32mMongoDB successfully upgraded to 6.0!\033[0m"
