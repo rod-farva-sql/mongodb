@@ -98,6 +98,35 @@ check_mount() {
 }
 
 
+# Function to check if MongoDB replica set is initiated (with retries)
+check_replica_set() {
+    local retries=30  # Maximum retries
+    local wait_time=5  # Seconds to wait between retries
+    local count=0
+
+    echo "Checking if MongoDB replica set is initiated..."
+
+    while [[ $count -lt $retries ]]; do
+        local rs_status=$(mongo --quiet --eval "try { rs.status().ok } catch(e) { printjson(e) }" 2>/dev/null)
+
+        if [[ $? -ne 0 ]]; then
+            error_message "MongoDB service might not be ready yet. Retrying in $wait_time seconds..."
+        elif [[ "$rs_status" == "1" ]]; then
+            success_message "Replica set is initiated and running."
+            return 0
+        else
+            error_message "Replica set is not fully initialized yet. Retrying in $wait_time seconds..."
+        fi
+
+        sleep $wait_time
+        ((count++))
+    done
+
+    error_message "Error: Replica set did not become ready within the timeout period. Exiting."
+    exit 1
+}
+
+
 ######################################################
 #This is where the party starts...
 
@@ -120,6 +149,9 @@ echo -e "\033[1;32mContinuing with upgrade...\033[0m"
 
 # Validate MongoDB version
 check_mongodb_version "3.6.23"
+
+# Verify the replica set is running
+check_replica_set
 
 # Upgrade from 3.6.23 to 4.0.28
 
@@ -194,9 +226,14 @@ wait_for_mongod
 # Validate MongoDB version
 check_mongodb_version "4.2.25"
 
+# Verify the replica set is running
+check_replica_set
+
 #Validate the FCV is now at 4.2
 run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '4.2' })\"" "Setting FCV to 4.2"
 verify_fcv "4.2"
+
+
 
 echo -e "\033[1;32mMongoDB successfully upgraded to 4.2!\033[0m"
 
@@ -237,6 +274,9 @@ wait_for_mongod
 
 # Validate MongoDB version
 check_mongodb_version "4.4.29"
+
+# Verify the replica set is running
+check_replica_set
 
 #Validate the FCV is now at 4.4
 run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '4.4' })\"" "Setting FCV to 4.4"
@@ -283,6 +323,9 @@ wait_for_mongod
 # Validate MongoDB version
 check_mongodb_version "5.0.31"
 
+# Verify the replica set is running
+check_replica_set
+
 #Validate the FCV is now at 5.0
 run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '5.0' })\"" "Setting FCV to 5.0"
 verify_fcv "5.0"
@@ -325,6 +368,9 @@ wait_for_mongod
 
 # Validate MongoDB version
 check_mongodb_version "6.0.19"
+
+# Verify the replica set is running
+check_replica_set
 
 #Validate the FCV is now at 6.0
 run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '6.0' })\"" "Setting FCV to 6.0"
