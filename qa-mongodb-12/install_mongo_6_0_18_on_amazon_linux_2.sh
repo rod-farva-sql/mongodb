@@ -142,15 +142,22 @@ fi
 
 
 
-#Now its time to dwonload Mongodb 6.0.19 rpm packages
+#Now its time to download Mongodb 6.0.19 rpm packages
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-org-server 6.0.19"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-tools-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-tools 6.0.19"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/RPMS/mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 5.0.31"
+#This is the latest version of mongodb-database-tools for Mongo 6.x (https://www.mongodb.com/docs/database-tools/release-notes/dbtools-100.5.0-changelog/)
+#Starting with MongoDB 4.4, the MongoDB Database Tools are now released separately from the MongoDB Server and use their own versioning, with an initial version of 100.0.0.
+#https://www.mongodb.com/docs/database-tools/
+#This also replaces the mongo-org-tools since 4.4
+run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-database-tools-100.5.4.x86_64.rpm" "Downloading mongodb-database-tools 100.5.4"
 
+#Original mongo shell is deprecated in 5+ so we now install this
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-mongosh-2.4.0.x86_64.rpm" "Downloading mongosh 2.4.0"
+
+
+
 
 
 
@@ -158,11 +165,18 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/R
 
 run_command "sudo rpm -ivh mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Installing mongodb-org-server 6.0.19"
 
-run_command "sudo rpm -ivh mongodb-org-tools-6.0.19-1.amzn2.x86_64.rpm" "Installing mongodb-org-tools 6.0.19"
+#cyrus-sasl is needed by mongodb-database-tools-100.5.4-1.x86_64
+run_command "sudo yum install cyrus-sasl"  "Installing cyrus-sasl for mongodb-database-tools prereq"
 
-run_command "sudo rpm -ivh mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Installing mongodb-org-shell 5.0.31"
+#cyrus-sasl-gssapi is needed by mongodb-database-tools-100.5.4-1.x86_64
+run_command "sudo yum install cyrus-sasl-gssapi"  "Installing sudo yum install cyrus-sasl-gssapi for mongodb-database-tools prereq"
+
+run_command "sudo rpm -ivh mongodb-database-tools-100.5.4.x86_64.rpm" "Installing mongodb-database-tools"
 
 run_command "rpm -ivh mongodb-mongosh-2.4.0.x86_64.rpm" "Installing mongosh 2.4.0"
+
+
+
 
 #Set permissions
 #RPM package sets mongo user as mongod instead of mongodb
