@@ -163,17 +163,17 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/R
 
 #Now its time to install 6.0.19 rpm packages
 
-run_command "sudo rpm -ivh mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Installing mongodb-org-server 6.0.19"
+run_command "yum -y mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Installing mongodb-org-server 6.0.19"
 
 #cyrus-sasl is needed by mongodb-database-tools-100.5.4-1.x86_64
-run_command "sudo yum -y install cyrus-sasl"  "Installing cyrus-sasl for mongodb-database-tools prereq"
+run_command "yum -y install cyrus-sasl"  "Installing cyrus-sasl for mongodb-database-tools prereq"
 
 #cyrus-sasl-gssapi is needed by mongodb-database-tools-100.5.4-1.x86_64
-run_command "sudo yum -y install cyrus-sasl-gssapi"  "Installing sudo yum install cyrus-sasl-gssapi for mongodb-database-tools prereq"
+run_command "yum -y install cyrus-sasl-gssapi"  "Installing sudo yum install cyrus-sasl-gssapi for mongodb-database-tools prereq"
 
-run_command "sudo rpm -ivh mongodb-database-tools-100.5.4.x86_64.rpm" "Installing mongodb-database-tools"
+run_command "yum -y mongodb-database-tools-100.5.4.x86_64.rpm" "Installing mongodb-database-tools"
 
-run_command "rpm -ivh mongodb-mongosh-2.4.0.x86_64.rpm" "Installing mongosh 2.4.0"
+run_command "yum -y mongodb-mongosh-2.4.0.x86_64.rpm" "Installing mongosh 2.4.0"
 
 
 
