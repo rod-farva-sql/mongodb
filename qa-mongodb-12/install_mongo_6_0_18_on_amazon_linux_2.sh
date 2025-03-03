@@ -111,7 +111,7 @@ run_command "mount UUID=$UUID /var/lib/mongodb" "Mounting ebs volume as /var/lib
 
 #Add the UUID-based entry to /etc/fstab if not already present
 if ! grep -q "UUID=$UUID" /etc/fstab; then
-  run_command "echo /"UUID=$UUID /var/lib/mongodb xfs defaults,nofail 0 0/" >> /etc/fstab" "Adding volume to /etc/fstab"
+  run_command "echo \"UUID=$UUID /var/lib/mongodb xfs defaults,nofail 0 0\" >> /etc/fstab" "Adding volume to /etc/fstab"
 fi
 
 
@@ -132,7 +132,7 @@ else
 fi
 
 
-read -p "Do you want to download install mongodb 3.6.5? (yes/no): " answer
+read -p "Do you want to download install mongodb 6.0.19? (yes/no): " answer
 if [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]; then
   echo "Continuing..."
 else
@@ -142,22 +142,27 @@ fi
 
 
 
-#Now its time to dwonload Mongodb 3.6.23 rpm packages
+#Now its time to dwonload Mongodb 6.0.19 rpm packages
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/3.6/x86_64/RPMS/mongodb-org-server-3.6.23-1.amzn2.x86_64.rpm" "Downloading mongodb-org-server 3.6.23"
+run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-org-server 6.0.19"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/3.6/x86_64/RPMS/mongodb-org-shell-3.6.23-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 3.6.23"
+run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-tools-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-tools 6.0.19"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/3.6/x86_64/RPMS/mongodb-org-tools-3.6.23-1.amzn2.x86_64.rpm" "Downloading mongodb-org-tools 3.6.23"
+run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/RPMS/mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 5.0.31"
+
+run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-mongosh-2.4.0.x86_64.rpm" "Downloading mongosh 2.4.0"
 
 
-#Now its time to install 3.6.23 rpm packages
 
-run_command "sudo rpm -ivh mongodb-org-server-3.6.23-1.amzn2.x86_64.rpm" "Installing mongodb-org-server 3.6.23"
+#Now its time to install 6.0.19 rpm packages
 
-run_command "sudo rpm -ivh mongodb-org-tools-3.6.23-1.amzn2.x86_64.rpm" "Installing mongodb-org-tools"
+run_command "sudo rpm -ivh mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Installing mongodb-org-server 6.0.19"
 
-run_command "sudo rpm -ivh mongodb-org-shell-3.6.23-1.amzn2.x86_64.rpm" "Installing mongodb-org-shell 3.6.23"
+run_command "sudo rpm -ivh mongodb-org-tools-6.0.19-1.amzn2.x86_64.rpm" "Installing mongodb-org-tools 6.0.19"
+
+run_command "sudo rpm -ivh mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Installing mongodb-org-shell 5.0.31"
+
+run_command "rpm -ivh mongodb-mongosh-2.4.0.x86_64.rpm" "Installing mongosh 2.4.0"
 
 #Set permissions
 #RPM package sets mongo user as mongod instead of mongodb
@@ -175,8 +180,7 @@ run_command "sudo systemctl start mongod" "Starting mongod service"
 
 run_command "sudo systemctl status mongod -l" "Checking status of mongod service"
 
-echo "Initiating replica set"
-# Lets initiate the replica set
-initiate_replica_set
+echo "Now you need to join this host to your replica set"
+
 
 
