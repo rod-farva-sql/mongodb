@@ -92,7 +92,7 @@ fi
 
 
 #Wait for the volume to be attached
-while  [! -e /dev/nvme1n1] ; do sleep 1; done
+while  [ ! -e /dev/nvme1n1 ] ; do sleep 1; done
 
 #Check if the volume already has a filesystem
 if ! blkid /dev/nvme1n1 | grep -q "UUID"; then
@@ -111,7 +111,7 @@ run_command "mount UUID=$UUID /var/lib/mongodb" "Mounting ebs volume as /var/lib
 
 #Add the UUID-based entry to /etc/fstab if not already present
 if ! grep -q "UUID=$UUID" /etc/fstab; then
-  run_command "echo "UUID=$UUID /var/lib/mongodb xfs defaults,nofail 0 0" >> /etc/fstab" "Adding volume to /etc/fstab"
+  run_command "echo /"UUID=$UUID /var/lib/mongodb xfs defaults,nofail 0 0/" >> /etc/fstab" "Adding volume to /etc/fstab"
 fi
 
 
@@ -146,7 +146,7 @@ fi
 
 
 #Wait for the volume to be attached
-while  [! -e /dev/nvme2n1] ; do sleep 1; done
+while  [ ! -e /dev/nvme2n1 ] ; do sleep 1; done
 
 #Check if the volume already has a filesystem
 if ! blkid /dev/nvme2n1 | grep -q "UUID"; then
@@ -165,7 +165,7 @@ run_command "mount UUID=$UUID /var/lib/mongodb_backup" "Mounting ebs volume as /
 
 #Add the UUID-based entry to /etc/fstab if not already present
 if ! grep -q "UUID=$UUID" /etc/fstab; then
-  run_command "echo "UUID=$UUID /var/lib/mongodb_backup xfs defaults,nofail 0 0" >> /etc/fstab" "Adding volume to /etc/fstab"
+  run_command "echo /"UUID=$UUID /var/lib/mongodb_backup xfs defaults,nofail 0 0/" >> /etc/fstab" "Adding volume to /etc/fstab"
 fi
 
 
