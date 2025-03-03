@@ -132,6 +132,72 @@ else
 fi
 
 
+
+
+
+
+read -p "Do you want to mount format and mount /var/lib/mongodb_backup? (yes/no): " answer
+if [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]; then
+  echo "Continuing..."
+else
+  echo "Operation cancelled."
+  exit 0
+fi
+
+
+#Wait for the volume to be attached
+while  [! -e /dev/nvme2n1] ; do sleep 1; done
+
+#Check if the volume already has a filesystem
+if ! blkid /dev/nvme2n1 | grep -q "UUID"; then
+  #Create an XFS filesystem if it doesn't exist
+  run_command "mkfs.xfs /dev/nvme2n1" "Formatting /dev/nvme2n1 as XFS"
+fi
+
+#Get the UUID of the volume
+UUID=$(blkid -s UUID -o value /dev/nvme2n1)
+
+#Create the mount point
+run_command "mkdir -p /var/lib/mongodb_backup"  "Creating mount point /var/lib/mongodb_backup"
+
+#Mount the volume using the UUID
+run_command "mount UUID=$UUID /var/lib/mongodb_backup" "Mounting ebs volume as /var/lib/mongodb_backup"
+
+#Add the UUID-based entry to /etc/fstab if not already present
+if ! grep -q "UUID=$UUID" /etc/fstab; then
+  run_command "echo "UUID=$UUID /var/lib/mongodb_backup xfs defaults,nofail 0 0" >> /etc/fstab" "Adding volume to /etc/fstab"
+fi
+
+
+# Check if there is data on the mounted volume
+if [ "$(ls -A /var/lib/mongodb_backup)" ]; then
+    echo "Warning: Data found on /var/lib/mongodb_backup."
+    read -p "Would you like to wipe the volume? (yes/no): " response
+
+    if [[ "$response" =~ ^[Yy][Ee][Ss]$ ]]; then
+        echo "Wiping the volume..."
+        rm -rf "/var/lib/mongodb_backup"/*
+        echo "Volume has been wiped."
+    else
+        echo "Volume data has been kept."
+    fi
+else
+    echo "The volume is empty."
+fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 read -p "Do you want to download install mongodb 3.6.5? (yes/no): " answer
 if [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]; then
   echo "Continuing..."
