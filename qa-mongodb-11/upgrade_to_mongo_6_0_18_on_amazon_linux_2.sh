@@ -163,11 +163,11 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.0/x86_64/R
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.0/x86_64/RPMS/mongodb-org-shell-4.0.28-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 4.0.28"
 
-run_command "rpm -Uvh mongodb-org-server-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 4.0.28"
+run_command "yum update -y mongodb-org-server-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 4.0.28"
 
-run_command "rpm -Uvh mongodb-org-tools-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-tools to 4.0.28"
+run_command "yum update -y mongodb-org-tools-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-tools to 4.0.28"
 
-run_command "rpm -Uvh mongodb-org-shell-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.0.28"
+run_command "yum update -y mongodb-org-shell-4.0.28-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.0.28"
 
 run_command "sudo systemctl start mongod"
 
@@ -217,11 +217,11 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.2/x86_64/R
 
 
 
-run_command "rpm -Uvh mongodb-org-server-4.2.25-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 4.2.25"
+run_command "yum update -y mongodb-org-server-4.2.25-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 4.2.25"
 
-run_command "rpm -Uvh mongodb-org-tools-4.2.25-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-tools to 4.2.25"
+run_command "yum update -y mongodb-org-tools-4.2.25-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-tools to 4.2.25"
 
-run_command "rpm -Uvh mongodb-org-shell-4.2.25-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.2.25"
+run_command "yum update -y mongodb-org-shell-4.2.25-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.2.25"
 
 
 
@@ -270,9 +270,9 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/R
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/4.4/x86_64/RPMS/mongodb-org-shell-4.4.29-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 4.4.29"
 
-run_command "rpm -Uvh mongodb-org-server-4.4.29-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 4.4.29"
+run_command "yum update -y mongodb-org-server-4.4.29-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 4.4.29"
 
-run_command "rpm -Uvh mongodb-org-shell-4.4.29-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.4.29"
+run_command "yum update -y mongodb-org-shell-4.4.29-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 4.4.29"
 
 run_command "sudo systemctl start mongod"
 
@@ -318,9 +318,9 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/R
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/5.0/x86_64/RPMS/mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Downloading mongodb-org-shell 5.0.31"
 
-run_command "rpm -Uvh mongodb-org-server-5.0.31-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 5.0.31"
+run_command "yum update -y mongodb-org-server-5.0.31-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 5.0.31"
 
-run_command "rpm -Uvh mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 5.0.31"
+run_command "yum update -y mongodb-org-shell-5.0.31-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-shell to 5.0.31"
 
 run_command "sudo systemctl start mongod"
 
@@ -370,7 +370,7 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/R
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-mongosh-2.4.0.x86_64.rpm" "Downloading mongosh 2.4.0"
 
-run_command "rpm -Uvh mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 6.0.19"
+run_command "yum update -y mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 6.0.19"
 
 run_command "yum remove -y mongodb-org-shell" "Removing deprecated mongodb-org-shell"
 
