@@ -463,7 +463,7 @@ check_mongodb_version "6.0.19"
 check_replica_set
 
 #Validate the FCV is now at 6.0
-run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '6.0' })\"" "Setting FCV to 6.0"
+run_command "mongosh --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '6.0' })\"" "Setting FCV to 6.0"
 verify_fcv "6.0"
 
 echo -e "\033[1;32mMongoDB successfully upgraded to 6.0!\033[0m"
