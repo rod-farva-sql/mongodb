@@ -56,25 +56,57 @@ verify_fcv() {
     fi
 }
 
-# Function to wait for mongod service to start
+# Function to wait for mongod service to start and be ready
 wait_for_mongod() {
     echo "Waiting for mongod service to start..."
     local retries=30  # Number of attempts
     local wait_time=5  # Time to wait between attempts in seconds
     local count=0
+
+    # Step 1: Ensure the mongod service is active
     while ! systemctl is-active --quiet mongod && [ $count -lt $retries ]; do
         echo "mongod is not active. Retrying in $wait_time seconds..."
         sleep $wait_time
         ((count++))
     done
+
     if [ $count -eq $retries ]; then
         echo "Error: mongod service failed to start. Exiting."
         exit 1
-    else
-        echo "mongod service is up and running."
-		echo "Waiting an additional 5 seconds to ensure MongoDB is ready..."
-		sleep 5
     fi
+
+    echo "mongod service is up and running."
+    
+    # Step 2: Ensure MongoDB is fully ready to accept connections
+    count=0
+    local mongo_cmd
+
+    # Determine which MongoDB client to use
+    if command -v mongo &>/dev/null; then
+        mongo_cmd="mongo --quiet --eval"
+    elif command -v mongosh &>/dev/null; then
+        mongo_cmd="mongosh --quiet --eval"
+    else
+        echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
+        exit 1
+    fi
+
+    echo "Waiting for MongoDB to become fully operational..."
+    while [ $count -lt $retries ]; do
+        local status=$($mongo_cmd "db.runCommand({ ping: 1 })" 2>/dev/null)
+
+        if [[ "$status" == *"ok"* ]]; then
+            echo "MongoDB is fully operational."
+            return 0
+        fi
+
+        echo "MongoDB is not ready yet. Retrying in $wait_time seconds..."
+        sleep $wait_time
+        ((count++))
+    done
+
+    echo "Error: MongoDB did not become ready within the timeout period. Exiting."
+    exit 1
 }
 
 # Function to verify MongoDB server version using either mongo or mongosh
