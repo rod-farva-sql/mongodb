@@ -80,6 +80,7 @@ wait_for_mongod() {
     # Step 2: Ensure MongoDB is fully ready to accept connections
     count=0
     local mongo_cmd
+    local connection_uri="mongodb://localhost:27017"
 
     # Determine which MongoDB client to use
     if command -v mongo &>/dev/null; then
@@ -93,9 +94,10 @@ wait_for_mongod() {
 
     echo "Waiting for MongoDB to become fully operational..."
     while [ $count -lt $retries ]; do
-        local status=$($mongo_cmd "db.runCommand({ ping: 1 })" 2>/dev/null)
+        # Extract only the 'ok' field from the JSON response
+        local status=$($mongo_cmd "$connection_uri" "db.runCommand({ ping: 1 }).ok" 2>/dev/null)
 
-        if [[ "$status" == *"ok"* ]]; then
+        if [[ "$status" == "1" ]]; then
             echo "MongoDB is fully operational."
             return 0
         fi
@@ -108,6 +110,8 @@ wait_for_mongod() {
     echo "Error: MongoDB did not become ready within the timeout period. Exiting."
     exit 1
 }
+
+
 
 # Function to verify MongoDB server version using either mongo or mongosh
 check_mongodb_version() {
