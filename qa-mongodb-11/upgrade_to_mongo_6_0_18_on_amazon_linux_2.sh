@@ -22,24 +22,43 @@ error_message() {
     echo -e "\e[31m$1\e[0m"
 }
 
-
 # Function to verify feature compatibility version using either mongo or mongosh
 verify_fcv() {
     local expected_version=$1
-    local mongo_cmd
+    local mongo_cmd=""
 
-    # Determine which MongoDB client to use
-    if command -v mongo &>/dev/null; then
-        mongo_cmd="mongo --quiet --eval"
-    elif command -v mongosh &>/dev/null; then
+    # Dynamically determine which MongoDB client to use
+    if command -v mongosh &>/dev/null; then
         mongo_cmd="mongosh --quiet --eval"
+    elif command -v mongo &>/dev/null; then
+        mongo_cmd="mongo --quiet --eval"
     else
         echo -e "\033[1;31mError: Neither 'mongo' nor 'mongosh' is installed or accessible.\033[0m"
         exit 1
     fi
 
-    # Get the featureCompatibilityVersion
-    local fcv=$($mongo_cmd "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']" 2>/dev/null)
+    # Debug: Show which MongoDB client is being used
+    echo -e "\033[1;34mUsing MongoDB client: $mongo_cmd\033[0m"
+
+    local raw_fcv=""
+    local fcv=""
+
+    # Use different extraction methods for mongosh and mongo
+    if [[ "$mongo_cmd" == "mongosh --quiet --eval" ]]; then
+        # Use db.adminCommand() for mongosh and format output properly
+        raw_fcv=$($mongo_cmd "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 }).featureCompatibilityVersion" 2>/dev/null)
+        # Extract the version using awk to strip non-numeric characters
+        fcv=$(echo "$raw_fcv" | awk -F"'" '{print $2}')
+    else
+        # Use db.adminCommand() for mongo
+        raw_fcv=$($mongo_cmd "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })" 2>/dev/null)
+        # Extract the "version" field using sed
+        fcv=$(echo "$raw_fcv" | sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p')
+    fi
+
+    # Debug: Show the raw FCV output and extracted version
+    echo -e "\033[1;34mRetrieved Feature Compatibility Version: $raw_fcv\033[0m"
+    echo -e "\033[1;34mExtracted Feature Compatibility Version: $fcv\033[0m"
 
     # Check if the command returned a valid result
     if [[ -z "$fcv" ]]; then
@@ -56,7 +75,11 @@ verify_fcv() {
     fi
 }
 
-# Function to wait for mongod service to start and be ready
+
+
+
+
+# Function to wait for mongod service to start and be ready (with improved detection)
 wait_for_mongod() {
     echo "Waiting for mongod service to start..."
     local retries=30  # Number of attempts
@@ -81,20 +104,30 @@ wait_for_mongod() {
     count=0
 
     while [ $count -lt $retries ]; do
-        local mongo_cmd
+        local mongo_cmd=""
 
         # Re-evaluate the available MongoDB client in case it has changed
-        if command -v mongo &>/dev/null; then
-            mongo_cmd="mongo --quiet --eval"
-        elif command -v mongosh &>/dev/null; then
+        if command -v mongosh &>/dev/null; then
             mongo_cmd="mongosh --quiet --eval"
+        elif command -v mongo &>/dev/null; then
+            mongo_cmd="mongo --quiet --eval"
         else
             echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
             exit 1
         fi
 
-        # Extract only the 'ok' field from the JSON response
-        local status=$($mongo_cmd "db.runCommand({ ping: 1 }).ok" 2>/dev/null)
+        # Debug: Print which MongoDB client is being used
+        echo "Using MongoDB client: $mongo_cmd"
+
+        # Run the ping command and capture the output
+        local raw_output
+        raw_output=$($mongo_cmd "db.runCommand({ ping: 1 })" 2>&1)
+        local status
+        status=$($mongo_cmd "db.runCommand({ ping: 1 }).ok" 2>/dev/null)
+
+        # Debug: Print raw output from the ping command
+        echo "Raw MongoDB ping output: $raw_output"
+        echo "Extracted 'ok' field: $status"
 
         if [[ "$status" == "1" ]]; then
             echo "MongoDB is fully operational."
@@ -110,20 +143,33 @@ wait_for_mongod() {
     exit 1
 }
 
-# Function to verify MongoDB server version using either mongo or mongosh
+
+
+
+
 check_mongodb_version() {
     local expected_version=$1
-    local current_version
+    local current_version=""
+    local mongo_cmd=""
 
-    # Try using mongo first
-    if command -v mongo &>/dev/null; then
-        current_version=$(mongo --quiet --eval "db.version()" 2>/dev/null)
-    elif command -v mongosh &>/dev/null; then
-        current_version=$(mongosh --quiet --eval "db.version()" 2>/dev/null)
+    # Dynamically determine which MongoDB client to use
+    if command -v mongosh &>/dev/null; then
+        mongo_cmd="mongosh --quiet --eval"
+    elif command -v mongo &>/dev/null; then
+        mongo_cmd="mongo --quiet --eval"
     else
         echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
         exit 1
     fi
+
+    # Debug: Show which MongoDB client is being used
+    echo "Using MongoDB client: $mongo_cmd"
+
+    # Fetch the MongoDB version
+    current_version=$($mongo_cmd "db.version()" 2>/dev/null)
+
+    # Debug: Show the fetched MongoDB version
+    echo "Detected MongoDB version: $current_version"
 
     # Check if the command was successful
     if [[ -z "$current_version" ]]; then
@@ -141,6 +187,7 @@ check_mongodb_version() {
 }
 
 
+
 # Function to check if a directory is mounted
 check_mount() {
     local mount_point=$1
@@ -152,37 +199,42 @@ check_mount() {
     fi
 }
 
-# Function to check if MongoDB replica set is initiated (with retries) using either mongo or mongosh
+# Function to check if MongoDB replica set is initiated (with retries)
 check_replica_set() {
     local retries=30  # Maximum retries
     local wait_time=5  # Seconds to wait between retries
     local count=0
-    local mongo_cmd
 
     echo "Checking if MongoDB replica set is initiated..."
 
-    # Determine which MongoDB client to use
-    if command -v mongo &>/dev/null; then
-        mongo_cmd="mongo --quiet --eval"
-    elif command -v mongosh &>/dev/null; then
-        mongo_cmd="mongosh --quiet --eval"
-    else
-        echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
-        exit 1
-    fi
-
     while [[ $count -lt $retries ]]; do
-        local rs_status=$($mongo_cmd "try { rs.status().ok } catch(e) { printjson(e) }" 2>/dev/null)
+        local mongo_cmd=""
+        local rs_status=""
 
-        if [[ -z "$rs_status" ]]; then
-            echo "MongoDB service might not be ready yet. Retrying in $wait_time seconds..."
-        elif [[ "$rs_status" == "1" ]]; then
-            echo "Replica set is initiated and running."
-            return 0
+        # Dynamically determine which MongoDB client to use
+        if command -v mongosh &>/dev/null; then
+            mongo_cmd="mongosh --quiet --eval"
+            # Use db.adminCommand() for mongosh
+            rs_status=$($mongo_cmd "db.adminCommand({ replSetGetStatus: 1 }).ok" 2>/dev/null)
+        elif command -v mongo &>/dev/null; then
+            mongo_cmd="mongo --quiet --eval"
+            # Use rs.status().ok for mongo
+            rs_status=$($mongo_cmd "try { rs.status().ok } catch(e) { printjson(e) }" 2>/dev/null)
         else
-            echo "Replica set is not fully initialized yet. Retrying in $wait_time seconds..."
+            echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
+            exit 1
         fi
 
+        # Debug: Print which MongoDB client is being used
+        echo "Using MongoDB client: $mongo_cmd"
+        echo "Extracted 'ok' field from rs.status(): $rs_status"
+
+        if [[ "$rs_status" == "1" ]]; then
+            echo "Replica set is initiated and running."
+            return 0
+        fi
+
+        echo "Replica set is not fully initialized yet. Retrying in $wait_time seconds..."
         sleep $wait_time
         ((count++))
     done
@@ -190,6 +242,8 @@ check_replica_set() {
     echo "Error: Replica set did not become ready within the timeout period. Exiting."
     exit 1
 }
+
+
 
 ######################################################
 #This is where the party starts...
@@ -468,17 +522,5 @@ run_command "mongosh --quiet --eval \"db.adminCommand({ setFeatureCompatibilityV
 verify_fcv "6.0"
 
 echo -e "\033[1;32mMongoDB successfully upgraded to 6.0!\033[0m"
-
-
-
-
-
-
-
-
-
-
-
-
 
 
