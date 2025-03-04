@@ -23,26 +23,35 @@ error_message() {
 }
 
 
-# Function to verify feature compatibility version with mongo
+# Function to verify feature compatibility version using either mongo or mongosh
 verify_fcv() {
     local expected_version=$1
-    local fcv=$(mongo --quiet --eval "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']")
-    if [[ "$fcv" == "$expected_version" ]]; then
-        echo -e "\033[1;32mFeature Compatibility Version is $fcv (as expected). \033[0m"
+    local mongo_cmd
+
+    # Determine which MongoDB client to use
+    if command -v mongo &>/dev/null; then
+        mongo_cmd="mongo --quiet --eval"
+    elif command -v mongosh &>/dev/null; then
+        mongo_cmd="mongosh --quiet --eval"
     else
-        echo -e "\033[1;31mError: Expected FCV $expected_version but found $fcv. Exiting.\033[0m"
+        echo -e "\033[1;31mError: Neither 'mongo' nor 'mongosh' is installed or accessible.\033[0m"
         exit 1
     fi
-}
 
-# Function to verify feature compatibility version with mongosh
-verify_fcv_sh() {
-    local expected_version=$1
-    local fcv=$(mongosh --quiet --eval "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']")
+    # Get the featureCompatibilityVersion
+    local fcv=$($mongo_cmd "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']" 2>/dev/null)
+
+    # Check if the command returned a valid result
+    if [[ -z "$fcv" ]]; then
+        echo -e "\033[1;31mError: Failed to retrieve Feature Compatibility Version. Ensure MongoDB is running.\033[0m"
+        exit 1
+    fi
+
+    # Compare the retrieved version with the expected version
     if [[ "$fcv" == "$expected_version" ]]; then
-        echo -e "\033[1;32mFeature Compatibility Version is $fcv (as expected). \033[0m"
+        echo -e "\033[1;32mFeature Compatibility Version is $fcv (as expected).\033[0m"
     else
-        echo -e"\033[1;31mError: Expected FCV $expected_version but found $fcv. Exiting. \033[0m"
+        echo -e "\033[1;31mError: Expected FCV $expected_version but found $fcv. Exiting.\033[0m"
         exit 1
     fi
 }
@@ -68,17 +77,28 @@ wait_for_mongod() {
     fi
 }
 
-
-# Function to verify MongoDB server version
+# Function to verify MongoDB server version using either mongo or mongosh
 check_mongodb_version() {
     local expected_version=$1
-    local current_version=$(mongo --quiet --eval "db.version()" 2>/dev/null)
+    local current_version
 
-    if [[ $? -ne 0 ]]; then
-        echo "Error: Failed to connect to MongoDB. Ensure the service is running."
+    # Try using mongo first
+    if command -v mongo &>/dev/null; then
+        current_version=$(mongo --quiet --eval "db.version()" 2>/dev/null)
+    elif command -v mongosh &>/dev/null; then
+        current_version=$(mongosh --quiet --eval "db.version()" 2>/dev/null)
+    else
+        echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
         exit 1
     fi
 
+    # Check if the command was successful
+    if [[ -z "$current_version" ]]; then
+        echo "Error: Failed to retrieve MongoDB version. Ensure the service is running."
+        exit 1
+    fi
+
+    # Compare versions
     if [[ "$current_version" == "$expected_version" ]]; then
         echo "MongoDB is running the expected version: $current_version"
     else
@@ -86,6 +106,8 @@ check_mongodb_version() {
         exit 1
     fi
 }
+
+
 # Function to check if a directory is mounted
 check_mount() {
     local mount_point=$1
@@ -97,35 +119,44 @@ check_mount() {
     fi
 }
 
-
-# Function to check if MongoDB replica set is initiated (with retries)
+# Function to check if MongoDB replica set is initiated (with retries) using either mongo or mongosh
 check_replica_set() {
     local retries=30  # Maximum retries
     local wait_time=5  # Seconds to wait between retries
     local count=0
+    local mongo_cmd
 
     echo "Checking if MongoDB replica set is initiated..."
 
-    while [[ $count -lt $retries ]]; do
-        local rs_status=$(mongo --quiet --eval "try { rs.status().ok } catch(e) { printjson(e) }" 2>/dev/null)
+    # Determine which MongoDB client to use
+    if command -v mongo &>/dev/null; then
+        mongo_cmd="mongo --quiet --eval"
+    elif command -v mongosh &>/dev/null; then
+        mongo_cmd="mongosh --quiet --eval"
+    else
+        echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
+        exit 1
+    fi
 
-        if [[ $? -ne 0 ]]; then
-            error_message "MongoDB service might not be ready yet. Retrying in $wait_time seconds..."
+    while [[ $count -lt $retries ]]; do
+        local rs_status=$($mongo_cmd "try { rs.status().ok } catch(e) { printjson(e) }" 2>/dev/null)
+
+        if [[ -z "$rs_status" ]]; then
+            echo "MongoDB service might not be ready yet. Retrying in $wait_time seconds..."
         elif [[ "$rs_status" == "1" ]]; then
-            success_message "Replica set is initiated and running."
+            echo "Replica set is initiated and running."
             return 0
         else
-            error_message "Replica set is not fully initialized yet. Retrying in $wait_time seconds..."
+            echo "Replica set is not fully initialized yet. Retrying in $wait_time seconds..."
         fi
 
         sleep $wait_time
         ((count++))
     done
 
-    error_message "Error: Replica set did not become ready within the timeout period. Exiting."
+    echo "Error: Replica set did not become ready within the timeout period. Exiting."
     exit 1
 }
-
 
 ######################################################
 #This is where the party starts...
@@ -401,7 +432,7 @@ check_replica_set
 
 #Validate the FCV is now at 6.0
 run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '6.0' })\"" "Setting FCV to 6.0"
-verify_fcv_sh "6.0"
+verify_fcv "6.0"
 
 echo -e "\033[1;32mMongoDB successfully upgraded to 6.0!\033[0m"
 
