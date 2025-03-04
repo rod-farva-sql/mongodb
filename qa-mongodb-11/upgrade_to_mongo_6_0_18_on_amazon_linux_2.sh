@@ -23,7 +23,7 @@ error_message() {
 }
 
 
-# Function to verify feature compatibility version
+# Function to verify feature compatibility version with mongo
 verify_fcv() {
     local expected_version=$1
     local fcv=$(mongo --quiet --eval "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']")
@@ -35,10 +35,10 @@ verify_fcv() {
     fi
 }
 
-# Function to verify feature compatibility version with mongo
+# Function to verify feature compatibility version with mongosh
 verify_fcv_sh() {
     local expected_version=$1
-    local fcv=$(mongo --quiet --eval "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']")
+    local fcv=$(mongosh --quiet --eval "db.adminCommand({ getParameter: 1, featureCompatibilityVersion: 1 })['featureCompatibilityVersion']['version']")
     if [[ "$fcv" == "$expected_version" ]]; then
         echo -e "\033[1;32mFeature Compatibility Version is $fcv (as expected). \033[0m"
     else
@@ -370,7 +370,21 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/R
 
 run_command "rpm -Uvh mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 6.0.19"
 
-run_command "rpm -ivh mongodb-mongosh-2.4.0.x86_64.rpm" "Installing mongosh 2.4.0"
+run_command "yum remove mongodb-org-shell" "Removing deprecated mongodb-org-shell"
+
+run_command "yum remove mongodb-org-tools" "Removing deprecated mongodb-org-tools"
+
+#cyrus-sasl is needed by mongodb-database-tools-100.5.4-1.x86_64
+run_command "yum install -y cyrus-sasl"  "Installing cyrus-sasl for mongodb-database-tools prereq"
+
+#cyrus-sasl-gssapi is needed by mongodb-database-tools-100.5.4-1.x86_64
+run_command "yum install -y cyrus-sasl-gssapi"  "Installing sudo yum install cyrus-sasl-gssapi for mongodb-database-tools prereq"
+
+#This also replaces the mongo-org-tools since 4.4
+run_command "yum install -y mongodb-database-tools-100.5.4.x86_64.rpm" "Installing mongodb-database-tools"
+
+#Original mongo shell is deprecated in 5+ so we now install this
+run_command "yum install -y mongodb-mongosh-2.4.0.x86_64.rpm" "Installing mongosh 2.4.0"
 
 run_command "sudo systemctl start mongod"
 
@@ -385,7 +399,7 @@ check_replica_set
 
 #Validate the FCV is now at 6.0
 run_command "mongo --quiet --eval \"db.adminCommand({ setFeatureCompatibilityVersion: '6.0' })\"" "Setting FCV to 6.0"
-verify_fcv "6.0"
+verify_fcv_sh "6.0"
 
 echo -e "\033[1;32mMongoDB successfully upgraded to 6.0!\033[0m"
 
