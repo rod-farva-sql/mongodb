@@ -366,13 +366,15 @@ run_command "systemctl stop mongod" "Stopping MongoDB"
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Downloading mongodb-org-server 6.0.19"
 
+run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-database-tools-100.5.4.x86_64.rpm" "Downloading mongodb-database-tools 100.5.4"
+
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-mongosh-2.4.0.x86_64.rpm" "Downloading mongosh 2.4.0"
 
 run_command "rpm -Uvh mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 6.0.19"
 
-run_command "yum remove mongodb-org-shell" "Removing deprecated mongodb-org-shell"
+run_command "yum remove -y mongodb-org-shell" "Removing deprecated mongodb-org-shell"
 
-run_command "yum remove mongodb-org-tools" "Removing deprecated mongodb-org-tools"
+run_command "yum remove -y mongodb-org-tools" "Removing deprecated mongodb-org-tools"
 
 #cyrus-sasl is needed by mongodb-database-tools-100.5.4-1.x86_64
 run_command "yum install -y cyrus-sasl"  "Installing cyrus-sasl for mongodb-database-tools prereq"
