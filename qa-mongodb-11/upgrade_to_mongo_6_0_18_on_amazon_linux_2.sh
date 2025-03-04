@@ -77,25 +77,24 @@ wait_for_mongod() {
 
     echo "mongod service is up and running."
     
-    # Step 2: Ensure MongoDB is fully ready to accept connections
-    count=0
-    local mongo_cmd
-    local connection_uri="mongodb://localhost:27017"
-
-    # Determine which MongoDB client to use
-    if command -v mongo &>/dev/null; then
-        mongo_cmd="mongo --quiet --eval"
-    elif command -v mongosh &>/dev/null; then
-        mongo_cmd="mongosh --quiet --eval"
-    else
-        echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
-        exit 1
-    fi
-
     echo "Waiting for MongoDB to become fully operational..."
+    count=0
+
     while [ $count -lt $retries ]; do
+        local mongo_cmd
+
+        # Re-evaluate the available MongoDB client in case it has changed
+        if command -v mongo &>/dev/null; then
+            mongo_cmd="mongo --quiet --eval"
+        elif command -v mongosh &>/dev/null; then
+            mongo_cmd="mongosh --quiet --eval"
+        else
+            echo "Error: Neither 'mongo' nor 'mongosh' is installed or accessible."
+            exit 1
+        fi
+
         # Extract only the 'ok' field from the JSON response
-        local status=$($mongo_cmd "$connection_uri" "db.runCommand({ ping: 1 }).ok" 2>/dev/null)
+        local status=$($mongo_cmd "db.runCommand({ ping: 1 }).ok" 2>/dev/null)
 
         if [[ "$status" == "1" ]]; then
             echo "MongoDB is fully operational."
@@ -110,8 +109,6 @@ wait_for_mongod() {
     echo "Error: MongoDB did not become ready within the timeout period. Exiting."
     exit 1
 }
-
-
 
 # Function to verify MongoDB server version using either mongo or mongosh
 check_mongodb_version() {
