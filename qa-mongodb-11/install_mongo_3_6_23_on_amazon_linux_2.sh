@@ -241,6 +241,9 @@ run_command "sudo systemctl start mongod" "Starting mongod service"
 
 run_command "sudo systemctl status mongod -l" "Checking status of mongod service"
 
+run_command "sudo sh -c 'echo "vm.max_map_count=1048576" >> /etc/sysctl.conf'" "Updating vm max map count"
+
+
 echo "Initiating replica set"
 # Lets initiate the replica set
 initiate_replica_set
