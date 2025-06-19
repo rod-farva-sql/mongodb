@@ -198,7 +198,7 @@ fi
 
 
 
-read -p "Do you want to download install mongodb 3.6.5? (yes/no): " answer
+read -p "Do you want to download install mongodb 3.6.23-1? (yes/no): " answer
 if [[ "$answer" =~ ^[Yy]([Ee][Ss])?$ ]]; then
   echo "Continuing..."
 else
