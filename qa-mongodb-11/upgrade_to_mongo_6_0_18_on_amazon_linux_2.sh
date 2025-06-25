@@ -486,7 +486,7 @@ run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/R
 
 run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-database-tools-100.5.4.x86_64.rpm" "Downloading mongodb-database-tools 100.5.4"
 
-run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-mongosh-2.4.0.x86_64.rpm" "Downloading mongosh 2.4.0"
+run_command "wget https://repo.mongodb.org/yum/amazon/2/mongodb-org/6.0/x86_64/RPMS/mongodb-mongosh-2.5.3.x86_64.rpm" "Downloading mongosh 2.5.3 (latest version)"
 
 run_command "yum update -y mongodb-org-server-6.0.19-1.amzn2.x86_64.rpm" "Upgrading mongodb-org-server to 6.0.19"
 
@@ -504,7 +504,7 @@ run_command "yum install -y cyrus-sasl-gssapi"  "Installing sudo yum install cyr
 run_command "yum install -y mongodb-database-tools-100.5.4.x86_64.rpm" "Installing mongodb-database-tools"
 
 #Original mongo shell is deprecated in 5+ so we now install this
-run_command "yum install -y mongodb-mongosh-2.4.0.x86_64.rpm" "Installing mongosh 2.4.0"
+run_command "yum install -y mongodb-mongosh-2.5.3.x86_64.rpm" "Installing mongosh 2.5.3 (latest version)"
 
 run_command "sudo systemctl start mongod"
 
